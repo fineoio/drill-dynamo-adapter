@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 
-package io.fineo.lambda.dynamo;
+package io.fineo.dynamo;
 
 import com.amazonaws.AmazonWebServiceClient;
 import com.amazonaws.auth.AWSCredentialsProvider;

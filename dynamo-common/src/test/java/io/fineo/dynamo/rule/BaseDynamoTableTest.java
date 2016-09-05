@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 
-package io.fineo.lambda.dynamo.rule;
+package io.fineo.dynamo.rule;
 
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.internal.StaticCredentialsProvider;

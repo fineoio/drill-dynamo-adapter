@@ -14,11 +14,11 @@
  *    limitations under the License.
  */
 
-package io.fineo.lambda.dynamo.rule;
+package io.fineo.dynamo.rule;
 
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
-import io.fineo.lambda.dynamo.LocalDynamoTestUtil;
+import io.fineo.dynamo.LocalDynamoTestUtil;
 import org.junit.rules.ExternalResource;
 
 /**

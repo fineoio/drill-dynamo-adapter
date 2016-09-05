@@ -1,0 +1,19 @@
+{
+  "storage":{
+    dynamo : {
+      type: "dynamo",
+      enabled: false,
+      credentials: {
+        type: "default"
+      },
+      aws: {
+        regionOrUrl: "http://localhost:8080"
+      },
+      parallel-scan: {
+      },
+      client: {
+        consistentRead: "true"
+      }
+    }
+  }
+}

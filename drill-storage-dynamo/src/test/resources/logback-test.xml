@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- For assistance related to logback-translator or configuration  -->
+<!-- files in general, please contact the logback user mailing list -->
+<!-- at http://www.qos.ch/mailman/listinfo/logback-user             -->
+<!--                                                                -->
+<!-- For professional support please see                            -->
+<!--    http://www.qos.ch/shop/products/professionalSupport         -->
+<!--                                                                -->
+<configuration>
+  <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5p %c{3}[%L] - %m%n</pattern>
+    </encoder>
+  </appender>
+  <logger name="com.amazon" level="INFO"/>
+  <logger name="com.amazonaws" level="INFO"/>
+  <logger name="org.apache.http" level="INFO"/>
+  <logger name="org.apache.drill.exec.compile" level="INFO"/>
+  <logger name="org.apache.drill.exec.planner.logical" level="INFO"/>
+  <root level="DEBUG">
+    <appender-ref ref="CONSOLE"/>
+  </root>
+</configuration>

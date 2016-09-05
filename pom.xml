@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>io.fineo.drill</groupId>
+  <artifactId>storage-dynamo</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <repositories>
+    <!-- Official amazon dynamo local repository -->
+    <repository>
+      <id>dynamodb-local</id>
+      <name>DynamoDB Local Release Repository</name>
+      <url>http://dynamodb-local.s3-website-us-west-2.amazonaws.com/release</url>
+    </repository>
+    <!-- Drill's Calcite Fork Repo -->
+    <repository>
+      <id>mapr-drill-optiq-snapshots</id>
+      <name>MapR Drill Optiq Snapshots</name>
+      <url>http://repository.mapr.com/nexus/content/repositories/drill/</url>
+    </repository>
+  </repositories>
+
+  <modules>
+    <module>drill-storage-dynamo</module>
+    <module>dynamo-common</module>
+    <module>drill-common</module>
+  </modules>
+
+  <properties>
+    <drill.version>1.6.0</drill.version>
+
+    <aws.java.sdk.version>1.10.72</aws.java.sdk.version>
+    <aws.dynamodb.local.version>1.10.5.1</aws.dynamodb.local.version>
+
+    <!-- Plugins -->
+    <maven.compiler.version>3.3</maven.compiler.version>
+    <maven.dependency.version>2.10</maven.dependency.version>
+
+    <!-- Test Properties -->
+    <junit.version>4.12</junit.version>
+    <surefire.version>2.19</surefire.version>
+
+    <!-- Test Running properties -->
+    <test.output.to.file>true</test.output.to.file>
+    <test.exclude.pattern></test.exclude.pattern>
+  </properties>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <!-- Copy the dependencies into the output directory. Needed for DynamoDB's SQLlite -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-dependency-plugin</artifactId>
+          <version>${maven.dependency.version}</version>
+          <executions>
+            <execution>
+              <!--<id>copy-dependencies</id>-->
+              <phase>process-test-resources</phase>
+              <goals>
+                <goal>copy-dependencies</goal>
+              </goals>
+              <configuration>
+                <outputDirectory>${project.build.directory}/dependencies</outputDirectory>
+                <overWriteReleases>false</overWriteReleases>
+                <overWriteSnapshots>false</overWriteSnapshots>
+                <overWriteIfNewer>true</overWriteIfNewer>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <!-- Create the test jar -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>2.6</version>
+          <executions>
+            <execution>
+              <goals>
+                <goal>test-jar</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>${maven.compiler.version}</version>
+        <configuration>
+          <source>1.8</source>
+          <target>1.8</target>
+        </configuration>
+      </plugin>
+      <plugin>
+        <!-- Configuration for two distinct phases of test execution. First phase just
+         supports local, non-s3 requiring tests. The second phase is just the tests
+         that require a connection to s3 manipulate buckets/files there. -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${surefire.version}</version>
+        <!-- Generic testing configuration for all packages -->
+        <configuration>
+          <redirectTestOutputToFile>${test.output.to.file}</redirectTestOutputToFile>
+          <argLine>-enableassertions -Djava.security.egd=file:/dev/./urandom
+            -Dsqlite4java.library.path=${project.build.directory}/dependencies
+            -Djava.net.preferIPv4Stack=true
+          </argLine>
+          <excludes>
+            <!-- users can add -D option to skip particular test classes
+           ex: mvn test -Dtest.exclude.pattern=**/TestFoo.java,**/TestBar.java
+            -->
+            <exclude>${test.exclude.pattern}</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencyManagement>
+    <dependencies>
+      <!-- intra-project dependencies -->
+      <dependency>
+        <groupId>io.fineo.drill</groupId>
+        <artifactId>drill-common</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.fineo.drill</groupId>
+        <artifactId>drill-common</artifactId>
+        <version>${project.version}</version>
+        <classifier>tests</classifier>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>io.fineo.drill</groupId>
+        <artifactId>dynamo-common</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.fineo.drill</groupId>
+        <artifactId>dynamo-common</artifactId>
+        <version>${project.version}</version>
+        <classifier>tests</classifier>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>1.7.21</version>
+      </dependency>
+      <dependency>
+        <groupId>com.amazonaws</groupId>
+        <artifactId>aws-java-sdk-dynamodb</artifactId>
+        <version>${aws.java.sdk.version}</version>
+        <exclusions>
+          <exclusion>
+            <artifactId>commons-logging</artifactId>
+            <groupId>commons-logging</groupId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>com.amazonaws</groupId>
+        <artifactId>DynamoDBLocal</artifactId>
+        <version>${aws.dynamodb.local.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <!-- Drill dependencies -->
+      <dependency>
+        <groupId>org.apache.drill.exec</groupId>
+        <artifactId>drill-jdbc-all</artifactId>
+        <version>${drill.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.drill.exec</groupId>
+        <artifactId>drill-java-exec</artifactId>
+        <version>${drill.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.drill.exec</groupId>
+        <artifactId>drill-jdbc</artifactId>
+        <version>${drill.version}</version>
+        <classifier>tests</classifier>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.drill.exec</groupId>
+        <artifactId>drill-java-exec</artifactId>
+        <version>${drill.version}</version>
+        <classifier>tests</classifier>
+        <scope>test</scope>
+      </dependency>
+      <!-- Simple json serialization -->
+      <dependency>
+        <groupId>com.fasterxml.jackson.jr</groupId>
+        <artifactId>jackson-jr-objects</artifactId>
+        <version>2.7.0</version>
+        <scope>test</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+</project>
